@@ -4,10 +4,28 @@ const connection = new Sequelize("demo_schema", "root", "", {
   dialect: "mysql",
 });
 
-const Article = connection.define("article", {
-  title: Sequelize.STRING, // See datatype list in the docs
-  body: Sequelize.TEXT,
-});
+const Article = connection.define(
+  "article",
+  {
+    slug: {
+      type: Sequelize.STRING,
+      primaryKey: true,
+    },
+    title: {
+      type: Sequelize.STRING,
+      unique: true,
+      allowNull: false,
+    },
+    body: {
+      type: Sequelize.TEXT,
+      defaultValue: "Not yet completed...",
+    },
+  },
+  {
+    timestamps: false,
+    // freezeTableName: true,
+  }
+);
 
 // connection
 //   .sync()
@@ -34,7 +52,7 @@ const Article = connection.define("article", {
 //   .catch();
 
 connection
-  .sync()
+  .sync({ force: true, logging: true })
   .then(() => {
     Article.findAll().then((articles) => console.log(articles.length));
   })
