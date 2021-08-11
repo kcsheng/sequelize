@@ -1,4 +1,3 @@
-const bcrypt = require("bcrypt");
 const { Sequelize, Op, Model, DataTypes } = require("sequelize");
 
 const connection = new Sequelize("demo_schema", "root", "", {
@@ -6,22 +5,15 @@ const connection = new Sequelize("demo_schema", "root", "", {
   dialect: "mysql",
 });
 
-const User = connection.define(
-  "user",
+const Article = connection.define(
+  "article",
   {
-    username: {
+    title: {
       type: DataTypes.STRING,
       primaryKey: true,
     },
-    password: {
+    content: {
       type: DataTypes.TEXT,
-    },
-  },
-  {
-    hooks: {
-      afterValidate(obj) {
-        obj.password = bcrypt.hashSync(obj.password, 8);
-      },
     },
   },
   {
@@ -31,11 +23,16 @@ const User = connection.define(
 );
 
 connection
-  .sync({ force: true, logging: console.log })
+  .sync({ force: true })
   .then(() => {
-    User.create({
-      username: "user123",
-      password: "thisisapassword",
+    // Article.create({
+    //   title: "This is a title",
+    //   content: "This is the content",
+    // });
+    const articleObj = Article.build({
+      title: "this is an article title",
+      content: "This is an article content...",
     });
+    articleObj.save();
   })
   .catch((err) => console.error(err));
