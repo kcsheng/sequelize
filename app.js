@@ -29,11 +29,28 @@ connection
         approved: true,
       },
     };
-    // Whitelist the properties reinforce to avoid sql injection
-    Article.create(req.body, { fields: ["title", "content"] }).then(
-      (article) => {
-        console.log(article.dataValues);
+    // Bulkcreate using json syntax
+    Article.bulkCreate(
+      [
+        {
+          title: "This is title1",
+          content: "This is content1",
+        },
+        {
+          title: "This is title2",
+          content: "This is content2",
+        },
+        {
+          title: "This is title3",
+          content: "This is content3",
+        },
+      ],
+      {
+        validate: true,
+        ignoreDuplicate: true,
       }
-    );
+    ).then((article) => {
+      console.log(article.dataValues);
+    });
   })
   .catch((err) => console.error(err));
