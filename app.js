@@ -5,34 +5,35 @@ const connection = new Sequelize("demo_schema", "root", "", {
   dialect: "mysql",
 });
 
-const Article = connection.define(
-  "article",
-  {
-    title: {
-      type: DataTypes.STRING,
-      primaryKey: true,
-    },
-    content: {
-      type: DataTypes.TEXT,
-    },
+const Article = connection.define("article", {
+  title: {
+    type: DataTypes.STRING,
+    primaryKey: true,
   },
-  {
-    timestamps: false,
-    // freezeTableName: true,
-  }
-);
+  content: {
+    type: DataTypes.TEXT,
+  },
+  approved: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+});
 
 connection
   .sync({ force: true })
   .then(() => {
-    // Article.create({
-    //   title: "This is a title",
-    //   content: "This is the content",
-    // });
-    const articleObj = Article.build({
-      title: "this is an article title",
-      content: "This is an article content...",
-    });
-    articleObj.save();
+    const req = {
+      body: {
+        title: "some title",
+        content: "some content",
+        approved: true,
+      },
+    };
+    // Whitelist the properties reinforce to avoid sql injection
+    Article.create(req.body, { fields: ["title", "content"] }).then(
+      (article) => {
+        console.log(article.dataValues);
+      }
+    );
   })
   .catch((err) => console.error(err));
