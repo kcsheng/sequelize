@@ -1,4 +1,5 @@
-const Sequelize = require("sequelize"); //The capitalization indicates this is a contructor function and must be called with the new operator.
+const { Sequelize, Op, Model, DataTypes } = require("sequelize");
+
 const connection = new Sequelize("demo_schema", "root", "", {
   host: "localhost",
   dialect: "mysql",
@@ -8,17 +9,33 @@ const Article = connection.define(
   "article",
   {
     slug: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
       primaryKey: true,
     },
     title: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
       unique: true,
       allowNull: false,
+      validate: {
+        len: {
+          args: [10, 100],
+          msg: "Please enter a message that is longer than 10 but shorter than 150 characters.",
+        },
+      },
     },
     body: {
-      type: Sequelize.TEXT,
-      defaultValue: "Not yet completed...",
+      type: DataTypes.TEXT,
+      // defaultValue: "Not yet completed...",
+      validate: {
+        startsWithCapital(value) {
+          const first = value.charAt(0);
+          if (first !== first.toUpperCase()) {
+            throw new Error(
+              "Your article content must start with capital letter."
+            );
+          }
+        },
+      },
     },
   },
   {
@@ -52,8 +69,12 @@ const Article = connection.define(
 //   .catch();
 
 connection
-  .sync({ force: true, logging: true })
+  .sync({ force: true, logging: console.log })
   .then(() => {
-    Article.findAll().then((articles) => console.log(articles.length));
+    Article.create({
+      slug: "wibble",
+      title: "wiggle ooooooooooo",
+      body: "Wobble ooo",
+    });
   })
-  .catch();
+  .catch((err) => console.error(err));
