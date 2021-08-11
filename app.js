@@ -1,3 +1,4 @@
+const bcrypt = require("bcrypt");
 const { Sequelize, Op, Model, DataTypes } = require("sequelize");
 
 const connection = new Sequelize("demo_schema", "root", "", {
@@ -5,35 +6,21 @@ const connection = new Sequelize("demo_schema", "root", "", {
   dialect: "mysql",
 });
 
-const Article = connection.define(
-  "article",
+const User = connection.define(
+  "user",
   {
-    slug: {
+    username: {
       type: DataTypes.STRING,
       primaryKey: true,
     },
-    title: {
-      type: DataTypes.STRING,
-    },
-    body: {
+    password: {
       type: DataTypes.TEXT,
     },
   },
   {
     hooks: {
-      beforeValidate() {
-        console.log("This shows for beforeValidate");
-      },
-      afterValidate() {
-        console.log("THis shows for aftervalidate");
-      },
-      beforeCreate() {
-        console.log("This shows for beforeCreate");
-      },
-      afterCreate(obj) {
-        console.log(
-          `This shows for aftercreate. The result has slug as ${obj.dataValues.slug}`
-        );
+      afterValidate(obj) {
+        obj.password = bcrypt.hashSync(obj.password, 8);
       },
     },
   },
@@ -44,12 +31,11 @@ const Article = connection.define(
 );
 
 connection
-  .sync({ force: true })
+  .sync({ force: true, logging: console.log })
   .then(() => {
-    Article.create({
-      slug: "This is Slug",
-      title: "This is title",
-      body: "This is the body...",
+    User.create({
+      username: "user123",
+      password: "thisisapassword",
     });
   })
   .catch((err) => console.error(err));
